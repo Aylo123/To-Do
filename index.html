@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Миний өдөр</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    --bg: #F1F4F1;
+    --surface: #FFFFFF;
+    --surface-2: #F7F9F7;
+    --ink: #1F2A24;
+    --muted: #66746B;
+    --line: #DCE3DD;
+    --primary: #2D6A4F;
+    --primary-ink: #FFFFFF;
+    --primary-soft: #DDEBE3;
+    --work: #3B6EA5;
+    --work-soft: #E2EBF5;
+    --personal: #B5577B;
+    --personal-soft: #F5E3EA;
+    --danger: #B4432F;
+    --mood: #C9C27A;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121714; --surface: #1A211D; --surface-2: #1F2823; --ink: #E5ECE7; --muted: #94A39A;
+      --line: #2C3730; --primary: #5FB38A; --primary-ink: #0E1A13; --primary-soft: #21352A;
+      --work: #7BA6D6; --work-soft: #1F2C3B; --personal: #E08DAD; --personal-soft: #3A2430;
+      --danger: #E57A64; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121714; --surface: #1A211D; --surface-2: #1F2823; --ink: #E5ECE7; --muted: #94A39A;
+    --line: #2C3730; --primary: #5FB38A; --primary-ink: #0E1A13; --primary-soft: #21352A;
+    --work: #7BA6D6; --work-soft: #1F2C3B; --personal: #E08DAD; --personal-soft: #3A2430;
+    --danger: #E57A64; color-scheme: dark;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 15px; line-height: 1.5;
+  }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+  .app { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; }
+
+  /* Хажуугийн цэс */
+  nav.side {
+    background: var(--surface); border-right: 1px solid var(--line);
+    padding: 24px 14px; display: flex; flex-direction: column; gap: 4px;
+    position: sticky; top: 0; height: 100vh;
+  }
+  .brand { font-family: "Unbounded", "Onest", sans-serif; font-weight: 700; font-size: 18px; padding: 0 10px 20px; }
+  .navbtn {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+    background: none; border: 0; border-radius: 10px; padding: 10px 12px; color: var(--muted); font-weight: 500;
+  }
+  .navbtn .ico { width: 20px; text-align: center; font-size: 16px; }
+  .navbtn[aria-current="page"] { background: var(--primary-soft); color: var(--ink); }
+  .navbtn:hover { color: var(--ink); }
+  .store { margin-top: auto; font-size: 12px; color: var(--muted); padding: 10px 12px; line-height: 1.4; }
+
+  main { padding: 28px 32px 48px; max-width: 1100px; width: 100%; }
+
+  /* Толгой: сэтгэл санааны өнгөөр будагдана */
+  .hero {
+    border-radius: 18px; padding: 22px 24px; margin-bottom: 22px;
+    background: color-mix(in srgb, var(--mood) 26%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--mood) 45%, var(--line));
+    transition: background .5s, border-color .5s;
+  }
+  .hero h1 { font-family: "Unbounded", "Onest", sans-serif; font-weight: 700; font-size: clamp(22px, 3.4vw, 30px); line-height: 1.15; margin: 0 0 4px; }
+  .hero .date { color: var(--muted); margin: 0 0 18px; }
+  .moods { display: flex; gap: 8px; flex-wrap: wrap; }
+  .moodbtn {
+    display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 76px;
+    background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; padding: 8px 10px; font-size: 12px; color: var(--muted);
+  }
+  .moodbtn .face { font-size: 24px; line-height: 1.1; }
+  .moodbtn[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); font-weight: 600; }
+  .note {
+    margin-top: 12px; width: 100%; resize: vertical; min-height: 42px; max-height: 160px;
+    background: color-mix(in srgb, var(--surface) 80%, transparent); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px;
+  }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  .card h2 { font-size: 16px; font-weight: 600; margin: 0 0 12px; display: flex; align-items: baseline; gap: 8px; }
+  .card h2 small { color: var(--muted); font-weight: 400; font-size: 13px; }
+
+  /* Ажил нэмэх форм */
+  .addform { display: grid; gap: 8px; margin-bottom: 18px; }
+  .addform .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .field {
+    background: var(--surface-2); border: 1.5px solid var(--line); border-radius: 10px; padding: 9px 11px; min-width: 0;
+  }
+  .field:focus { outline: none; border-color: var(--primary); }
+  .addform .title { flex: 1 1 220px; }
+  .seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .seg button { background: var(--surface-2); border: 0; padding: 8px 12px; color: var(--muted); }
+  .seg button[aria-pressed="true"][data-cat="work"] { background: var(--work-soft); color: var(--work); font-weight: 600; }
+  .seg button[aria-pressed="true"][data-cat="personal"] { background: var(--personal-soft); color: var(--personal); font-weight: 600; }
+  .btn { background: var(--primary); color: var(--primary-ink); border: 0; border-radius: 10px; padding: 9px 16px; font-weight: 600; }
+  .formerr { color: var(--danger); font-size: 13px; min-height: 0; }
+
+  /* Цагийн хуваарь */
+  .timeline { position: relative; display: grid; gap: 2px; }
+  .slot { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; align-items: stretch; }
+  .slot .t { color: var(--muted); font-size: 13px; padding-top: 10px; text-align: right; font-variant-numeric: tabular-nums; }
+  .slot .t.now { color: var(--primary); font-weight: 600; }
+
+  /* Ажлын мөр */
+  .task {
+    display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px;
+    border-left: 4px solid var(--line); background: var(--surface-2); margin-bottom: 6px;
+  }
+  .task[data-cat="work"] { border-left-color: var(--work); }
+  .task[data-cat="personal"] { border-left-color: var(--personal); }
+  .check {
+    width: 22px; height: 22px; flex: none; border-radius: 7px; border: 2px solid var(--line); background: var(--surface);
+    display: grid; place-items: center; padding: 0;
+  }
+  .task.done .check { background: var(--primary); border-color: var(--primary); }
+  .task.done .check::after { content: ""; width: 6px; height: 11px; border: solid var(--primary-ink); border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px, -1px); }
+  .task .body { flex: 1; min-width: 0; }
+  .task .name { overflow-wrap: anywhere; }
+  .task.done .name { text-decoration: line-through; color: var(--muted); }
+  .meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; font-size: 12px; color: var(--muted); }
+  .tag { border-radius: 6px; padding: 0 7px; font-weight: 500; }
+  .tag.work { background: var(--work-soft); color: var(--work); }
+  .tag.personal { background: var(--personal-soft); color: var(--personal); }
+  .pri-high { color: var(--danger); font-weight: 600; }
+  .del { background: none; border: 0; color: var(--muted); font-size: 18px; padding: 2px 6px; border-radius: 6px; line-height: 1; }
+  .del:hover { color: var(--danger); }
+  .empty { color: var(--muted); font-size: 14px; padding: 10px 2px; }
+  .group-title { font-size: 13px; font-weight: 600; color: var(--muted); margin: 16px 0 8px; }
+  .group-title:first-child { margin-top: 0; }
+  .group-title.late { color: var(--danger); }
+  .progress { height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; margin: -4px 0 14px; }
+  .progress i { display: block; height: 100%; background: var(--primary); width: 0; transition: width .4s; }
+
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+  .chip { background: transparent; border: 1.5px solid var(--line); color: var(--muted); border-radius: 999px; padding: 4px 13px; font-size: 13px; }
+  .chip[aria-pressed="true"] { background: var(--primary-soft); border-color: var(--primary); color: var(--ink); }
+  .toggle { margin-left: auto; font-size: 13px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+
+  /* Сэтгэл санааны түүх */
+  .strip { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 6px; margin-bottom: 20px; }
+  .day { text-align: center; font-size: 11px; color: var(--muted); }
+  .day .dot { aspect-ratio: 1; border-radius: 10px; background: var(--surface-2); border: 1px dashed var(--line); margin-bottom: 4px; display: grid; place-items: center; font-size: 16px; }
+  .day .dot.has { border: 0; }
+  .entry { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .entry:first-of-type { border-top: 0; }
+  .entry .face { font-size: 22px; }
+  .entry .when { font-size: 13px; color: var(--muted); }
+
+  /* Календарь */
+  .calwrap { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 22px; align-items: start; }
+  @media (max-width: 1000px) { .calwrap { grid-template-columns: 1fr; } }
+  .calhead { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+  .calhead h2 { margin: 0; flex: 1; }
+  .navarrow { background: var(--surface-2); border: 1.5px solid var(--line); border-radius: 9px; padding: 5px 11px; font-size: 14px; }
+  .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+  .wd { font-size: 12px; color: var(--muted); text-align: center; padding-bottom: 4px; font-weight: 600; }
+  .cell {
+    min-height: 98px; background: var(--surface-2); border: 1.5px solid transparent; border-radius: 10px;
+    padding: 6px; text-align: left; display: flex; flex-direction: column; gap: 4px; overflow: hidden; min-width: 0;
+  }
+  .cell:hover { border-color: var(--line); }
+  .cell.other { opacity: .45; }
+  .cell[aria-pressed="true"] { border-color: var(--primary); background: var(--surface); }
+  .cell .top { display: flex; align-items: center; justify-content: space-between; }
+  .cell .num { font-size: 13px; font-weight: 600; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-variant-numeric: tabular-nums; }
+  .cell.today .num { background: var(--primary); color: var(--primary-ink); }
+  .mdot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .chips { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .cchip { font-size: 11px; line-height: 1.35; border-radius: 5px; padding: 1px 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cchip.work { background: var(--work-soft); color: var(--work); }
+  .cchip.personal { background: var(--personal-soft); color: var(--personal); }
+  .cchip.done { text-decoration: line-through; opacity: .55; }
+  .more { font-size: 11px; color: var(--muted); }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: 12px; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .legend i { width: 9px; height: 9px; border-radius: 3px; display: inline-block; }
+
+  /* Playlist */
+  .playlist { margin-top: 22px; }
+  .pl-form { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+  .pl-form .url { flex: 2 1 260px; }
+  .song { display: flex; align-items: center; gap: 12px; padding: 10px 4px; border-top: 1px solid var(--line); }
+  .song:first-child { border-top: 0; }
+  .song .idx { width: 20px; text-align: right; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; flex: none; }
+  .song .pdot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .song .info { flex: 1; min-width: 0; }
+  .song .stitle { font-weight: 500; overflow-wrap: anywhere; }
+  .song .ssub { font-size: 12px; color: var(--muted); }
+  .openbtn { text-decoration: none; background: var(--primary-soft); color: var(--ink); border-radius: 9px; padding: 6px 12px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .ghost { background: none; border: 1.5px dashed var(--line); color: var(--muted); border-radius: 10px; padding: 8px 12px; font-size: 13px; margin-top: 6px; }
+
+  /* Горим солих товч */
+  .hero { position: relative; }
+  .hero h1 { padding-right: 52px; }
+  .themebtn {
+    position: absolute; top: 16px; right: 16px; width: 40px; height: 40px; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink); display: grid; place-items: center; padding: 0;
+  }
+  .themebtn svg { width: 18px; height: 18px; fill: currentColor; }
+
+  /* Пластинк тоглуулагч */
+  .player {
+    display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 26px; align-items: center;
+    padding: 20px; margin: 0 0 18px; border-radius: 14px;
+    background: color-mix(in srgb, var(--primary) 9%, var(--surface-2));
+  }
+  .deck { width: 190px; aspect-ratio: 1; }
+  .record {
+    width: 100%; height: 100%; border-radius: 50%; display: grid; place-items: center;
+    background:
+      conic-gradient(from 20deg, transparent 0 10%, rgba(255,255,255,.10) 14%, transparent 18% 60%, rgba(255,255,255,.07) 64%, transparent 68%),
+      repeating-radial-gradient(circle at center, #121212 0 1.5px, #1d1d1d 1.5px 3px);
+    box-shadow: 0 12px 28px rgba(0,0,0,.28), inset 0 0 0 5px #0b0b0b;
+    outline: 1px solid var(--line);
+  }
+  .record.spin { animation: spin 3.2s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .label {
+    --label: #8A948E; width: 38%; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center;
+    background: radial-gradient(circle, #0b0b0b 0 7%, transparent 8%), var(--label);
+    color: #fff; font-family: "Unbounded", "Onest", sans-serif; font-weight: 700; font-size: 12px;
+  }
+  .label span { transform: translateY(-115%); }
+  .ptitle-big { font-family: "Unbounded", "Onest", sans-serif; font-weight: 700; font-size: clamp(18px, 2.6vw, 24px); line-height: 1.2; overflow-wrap: anywhere; }
+  .psub { color: var(--muted); font-size: 13px; margin: 6px 0 16px; }
+  .controls { display: flex; gap: 10px; align-items: center; }
+  .ctl {
+    width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface);
+    color: var(--ink); display: grid; place-items: center; padding: 0; text-decoration: none;
+  }
+  .ctl:disabled { opacity: .4; cursor: default; }
+  .ctl.play { width: 54px; height: 54px; background: var(--primary); color: var(--primary-ink); border: 0; }
+  .ctl svg { width: 18px; height: 18px; fill: currentColor; }
+  .ctl.play svg { width: 22px; height: 22px; }
+  .song { cursor: pointer; border-radius: 8px; padding-left: 6px; padding-right: 6px; }
+  .song.sel { background: var(--primary-soft); border-top-color: transparent; }
+  .song.sel + .song { border-top-color: transparent; }
+  .song.sel .idx { color: var(--primary); font-weight: 700; }
+  @media (max-width: 560px) {
+    .player { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+    .deck { width: 170px; }
+    .controls { justify-content: center; }
+  }
+  @media (prefers-reduced-motion: reduce) { .record.spin { animation: none; } }
+
+  .toast {
+    position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; max-width: 90vw; display: none; z-index: 30;
+  }
+  .loading { color: var(--muted); padding: 40px 0; }
+  [hidden] { display: none !important; }
+
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 680px) {
+    .app { grid-template-columns: 1fr; }
+    nav.side {
+      position: fixed; top: auto; bottom: 0; left: 0; right: 0; height: auto; z-index: 20;
+      flex-direction: row; justify-content: space-around; padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+      border-right: 0; border-top: 1px solid var(--line);
+    }
+    .brand, .store { display: none; }
+    .navbtn { flex-direction: column; gap: 2px; font-size: 12px; padding: 6px 8px; align-items: center; text-align: center; }
+    main { padding: 18px 14px 110px; }
+    .strip { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .cal { gap: 3px; }
+    .cell { min-height: 58px; padding: 4px; gap: 3px; }
+    .cell .num { width: 22px; height: 22px; font-size: 12px; }
+    .mdot { width: 7px; height: 7px; }
+    .chips { flex-direction: row; flex-wrap: wrap; gap: 3px; }
+    .cchip { font-size: 0; width: 7px; height: 7px; padding: 0; border-radius: 50%; }
+    .cchip.work { background: var(--work); }
+    .cchip.personal { background: var(--personal); }
+    .more { font-size: 9px; line-height: 7px; }
+    .navbtn { padding: 6px 4px; font-size: 11px; }
+    .moods { flex-wrap: nowrap; gap: 6px; }
+    .moodbtn { min-width: 0; flex: 1 1 0; padding: 8px 2px; font-size: 11px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .hero, .progress i { transition: none; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="side" aria-label="Цэс">
+    <div class="brand">Миний өдөр</div>
+    <button class="navbtn" data-view="today" aria-current="page"><span class="ico">☀︎</span>Өнөөдөр</button>
+    <button class="navbtn" data-view="calendar"><span class="ico">▦</span>Календарь</button>
+    <button class="navbtn" data-view="tasks"><span class="ico">☰</span>Ажлууд</button>
+    <button class="navbtn" data-view="mood"><span class="ico">◐</span>Сэтгэл санаа</button>
+    <div class="store" id="store">Хадгалалтыг шалгаж байна…</div>
+  </nav>
+
+  <main>
+    <div id="loading" class="loading">Ачаалж байна…</div>
+
+    <!-- ӨНӨӨДӨР -->
+    <section id="view-today" hidden>
+      <div class="hero">
+        <button class="themebtn" id="themeBtn" type="button"></button>
+        <h1 id="greet"></h1>
+        <p class="date" id="todayDate"></p>
+        <div class="moods" id="moodPicker" role="group" aria-label="Өнөөдрийн сэтгэл санаа"></div>
+        <textarea class="note" id="moodNote" rows="1" placeholder="Өнөөдөр юу бодогдож байна? (заавал биш)" maxlength="500"></textarea>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Өнөөдрийн төлөвлөгөө <small id="todayCount"></small></h2>
+          <div class="progress" aria-hidden="true"><i id="todayBar"></i></div>
+          <div id="todayPlan"></div>
+        </div>
+        <div class="card">
+          <h2>Ажил нэмэх</h2>
+          <div class="addform" data-form="today"></div>
+          <div id="todayUntimed"></div>
+        </div>
+      </div>
+
+      <div class="card playlist">
+        <h2>Өнөөдрийн playlist <small id="plCount"></small></h2>
+        <div class="player" id="player" hidden>
+          <div class="deck"><div class="record" id="record"><div class="label" id="recLabel"><span id="recNum"></span></div></div></div>
+          <div class="pinfo">
+            <div class="ptitle-big" id="pTitle"></div>
+            <div class="psub" id="pSub"></div>
+            <div class="controls">
+              <button class="ctl" id="pPrev" type="button" aria-label="Өмнөх дуу"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+              <a class="ctl play" id="pPlay" target="_blank" rel="noopener noreferrer" aria-label="Сонсох"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></a>
+              <button class="ctl" id="pNext" type="button" aria-label="Дараагийн дуу"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="pl-form">
+          <input class="field url" id="plUrl" type="url" inputmode="url" placeholder="Дууны линкийг энд хуулж оруулна" aria-label="Дууны линк">
+          <button class="btn" id="plAdd" type="button">Нэмэх</button>
+        </div>
+        <div class="formerr" id="plErr" role="alert"></div>
+        <div id="plList"></div>
+      </div>
+    </section>
+
+    <!-- АЖЛУУД -->
+    <section id="view-tasks" hidden>
+      <div class="card">
+        <h2>Бүх ажлууд</h2>
+        <div class="addform" data-form="tasks"></div>
+        <div class="filters" role="group" aria-label="Шүүлтүүр">
+          <button class="chip" data-cat-filter="all" aria-pressed="true">Бүгд</button>
+          <button class="chip" data-cat-filter="work" aria-pressed="false">Ажил</button>
+          <button class="chip" data-cat-filter="personal" aria-pressed="false">Хувийн</button>
+          <label class="toggle"><input type="checkbox" id="showDone"> Дууссаныг харуулах</label>
+        </div>
+        <div id="taskGroups"></div>
+      </div>
+    </section>
+
+    <!-- КАЛЕНДАРЬ -->
+    <section id="view-calendar" hidden>
+      <div class="calwrap">
+        <div class="card">
+          <div class="calhead">
+            <h2 id="calTitle"></h2>
+            <button class="navarrow" id="calPrev" aria-label="Өмнөх сар">‹</button>
+            <button class="navarrow" id="calToday">Өнөөдөр</button>
+            <button class="navarrow" id="calNext" aria-label="Дараагийн сар">›</button>
+          </div>
+          <div class="cal" id="calGrid"></div>
+          <div class="legend">
+            <span><i style="background:var(--work)"></i>Ажил</span>
+            <span><i style="background:var(--personal)"></i>Хувийн</span>
+            <span><i style="background:#E7B04B;border-radius:50%"></i>Тухайн өдрийн сэтгэл санаа</span>
+          </div>
+        </div>
+        <div class="card">
+          <h2 id="calDayTitle"></h2>
+          <div class="addform" data-form="calendar"></div>
+          <div id="calDayList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- СЭТГЭЛ САНАА -->
+    <section id="view-mood" hidden>
+      <div class="card">
+        <h2>Сүүлийн 14 хоног</h2>
+        <div class="strip" id="moodStrip"></div>
+        <div id="moodEntries"></div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ==========================================================
+   ТУСЛАХ ФУНКЦУУД
+   ========================================================== */
+const pad = n => String(n).padStart(2, "0");
+const dateKey = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const addDays = (key, n) => { const [y, m, d] = key.split("-").map(Number); return dateKey(new Date(y, m - 1, d + n)); };
+const WEEKDAYS = ["Ням", "Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба"];
+function prettyDate(key, withWeekday = true) {
+  const [y, m, d] = key.split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  return (withWeekday ? WEEKDAYS[dt.getDay()] + ", " : "") + `${m}-р сарын ${d}`;
+}
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const $ = s => document.querySelector(s);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+/* Горим (цайвар / бараан) — сонголтыг энэ хөтчид санана */
+const THEME_KEY = "planner-theme";
+const THEME_ICONS = {
+  moon: '<svg viewBox="0 0 24 24"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1z"/></svg>',
+  sun: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>',
+};
+const currentTheme = () => document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+function applyTheme(t) {
+  if (t) document.documentElement.dataset.theme = t;
+  const b = document.getElementById("themeBtn"); if (!b) return;
+  const dark = currentTheme() === "dark";
+  b.innerHTML = dark ? THEME_ICONS.sun : THEME_ICONS.moon;
+  b.setAttribute("aria-label", dark ? "Цайвар горимд шилжих" : "Бараан горимд шилжих");
+  b.title = b.getAttribute("aria-label");
+}
+try { const saved = localStorage.getItem(THEME_KEY); if (saved === "dark" || saved === "light") document.documentElement.dataset.theme = saved; } catch (e) {}
+
+const MOODS = [
+  { level: 1, face: "😞", label: "Муу", color: "#7C8BA1" },
+  { level: 2, face: "😕", label: "Ядарсан", color: "#8FB0A3" },
+  { level: 3, face: "😐", label: "Дунд зэрэг", color: "#C9C27A" },
+  { level: 4, face: "🙂", label: "Сайн", color: "#E7B04B" },
+  { level: 5, face: "😄", label: "Гайхалтай", color: "#F08A4B" },
+];
+const PRI = { high: "Өндөр", mid: "Дунд", low: "Бага" };
+const PLATFORMS = {
+  youtube: { name: "YouTube", color: "#C4302B" },
+  ytmusic: { name: "YouTube Music", color: "#E0474C" },
+  spotify: { name: "Spotify", color: "#1DB954" },
+  apple: { name: "Apple Music", color: "#FA2D48" },
+  soundcloud: { name: "SoundCloud", color: "#FF5500" },
+  other: { name: "Линк", color: "#8A948E" },
+};
+const KIND = { song: "дуу", playlist: "playlist", album: "цомог", artist: "уран бүтээлч", episode: "подкаст", link: "линк" };
+
+// Линкээс платформ болон төрлийг танина
+function parseMusicUrl(raw) {
+  let u; try { u = new URL(raw.trim()); } catch (e) { return null; }
+  if (u.protocol !== "https:" && u.protocol !== "http:") return null;
+  const h = u.hostname.replace(/^(www|m)\./, "");
+  const p = u.pathname;
+  const out = (platform, kind) => ({ url: u.href, host: h, platform, kind });
+  if (h === "music.youtube.com") return out("ytmusic", u.searchParams.has("list") && !u.searchParams.has("v") ? "playlist" : "song");
+  if (h === "youtube.com" || h === "youtu.be") return out("youtube", p.startsWith("/playlist") ? "playlist" : "song");
+  if (h === "open.spotify.com") {
+    const k = (p.match(/\/(track|playlist|album|artist|episode)\//) || [])[1];
+    return out("spotify", k === "track" || !k ? "song" : k);
+  }
+  if (h === "music.apple.com") return out("apple", p.includes("/playlist/") ? "playlist" : p.includes("/album/") && !u.searchParams.has("i") ? "album" : "song");
+  if (h === "soundcloud.com" || h === "on.soundcloud.com") return out("soundcloud", p.includes("/sets/") ? "playlist" : "song");
+  return out("other", "link");
+}
+const CAT = { work: "Ажил", personal: "Хувийн" };
+
+/* ==========================================================
+   1. DATA ДАВХАРГА
+   Хоёр адаптер ижил интерфэйстэй: load / saveTask / deleteTask / saveMood.
+   Claude-ийн серверт хадгалах боломжтой бол CloudAdapter,
+   үгүй бол энэ хөтчид хадгалах LocalAdapter ашиглана.
+   ========================================================== */
+const LocalAdapter = {
+  label: "Энэ хөтөч дээр хадгалагдаж байна.",
+  KEY: "planner-v1",
+  read() {
+    let s; try { s = JSON.parse(localStorage.getItem(this.KEY)); } catch (e) {}
+    s = s || {}; s.tasks = s.tasks || {}; s.moods = s.moods || {}; s.playlists = s.playlists || {};
+    return s;
+  },
+  write(s) { try { localStorage.setItem(this.KEY, JSON.stringify(s)); } catch (e) {} },
+  async start(onChange) { const s = this.read(); onChange(s.tasks, s.moods, s.playlists); },
+  async saveTask(t) { const s = this.read(); s.tasks[t.id] = t; this.write(s); },
+  async deleteTask(id) { const s = this.read(); delete s.tasks[id]; this.write(s); },
+  async saveMood(m) { const s = this.read(); s.moods[m.date] = m; this.write(s); },
+  async savePlaylist(p) { const s = this.read(); s.playlists[p.date] = p; this.write(s); },
+};
+
+function makeCloudAdapter(db, userId) {
+  // Хувийн хэсэг: data/users/<id>/... — зөвхөн таньд харагдана
+  const root = db.doc(`data/users/${userId}/planner`);
+  const tasksCol = root.collection("tasks");
+  const moodsCol = root.collection("moods");
+  const playlistsCol = root.collection("playlists");
+  return {
+    label: "Таны аккаунтад хадгалагдаж, бүх төхөөрөмж дээр харагдана.",
+    async start(onChange) {
+      let tasks = {}, moods = {}, playlists = {}, gotT = false, gotM = false, gotP = false;
+      const emit = () => { if (gotT && gotM && gotP) onChange(tasks, moods, playlists); };
+      tasksCol.onSnapshot(snap => {
+        tasks = {}; snap.docs.forEach(d => { tasks[d.id] = { ...d.data(), id: d.id }; }); gotT = true; emit();
+      }, err => { gotT = true; emit(); showToast("Ажлуудыг уншиж чадсангүй (" + err.code + ")."); });
+      moodsCol.onSnapshot(snap => {
+        moods = {}; snap.docs.forEach(d => { moods[d.id] = { ...d.data(), date: d.id }; }); gotM = true; emit();
+      }, err => { gotM = true; emit(); showToast("Сэтгэл санааг уншиж чадсангүй (" + err.code + ")."); });
+      playlistsCol.onSnapshot(snap => {
+        playlists = {}; snap.docs.forEach(d => { playlists[d.id] = { ...d.data(), date: d.id }; }); gotP = true; emit();
+      }, err => { gotP = true; emit(); showToast("Playlist-ийг уншиж чадсангүй (" + err.code + ")."); });
+    },
+    saveTask: t => tasksCol.doc(t.id).set({ ...t }),
+    deleteTask: id => tasksCol.doc(id).delete(),
+    saveMood: m => moodsCol.doc(m.date).set({ ...m }),
+    savePlaylist: p => playlistsCol.doc(p.date).set({ date: p.date, items: p.items.map(i => ({ ...i })) }),
+  };
+}
+
+async function pickAdapter() {
+  try {
+    if (window.claude && typeof window.claude.use === "function") {
+      const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+      const id = user ? await user.id() : null;
+      if (db && id) return makeCloudAdapter(db, id);
+    }
+  } catch (e) {}
+  return LocalAdapter;
+}
+
+/* ==========================================================
+   2. LOGIC ДАВХАРГА
+   Дүрэм шалгах, өгөгдлийг ангилах. UI-г мэдэхгүй.
+   ========================================================== */
+const Planner = {
+  store: null,
+  tasks: {},
+  moods: {},
+  playlists: {},
+
+  async addTask({ title, cat, pri, date, time }) {
+    const clean = (title || "").trim();
+    if (!clean) throw new Error("Ажлын нэрийг бичнэ үү.");
+    if (clean.length > 200) throw new Error("200 тэмдэгтээс богино бичнэ үү.");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error("Огноо сонгоно уу.");
+    const t = { id: uid(), title: clean, cat: CAT[cat] ? cat : "work", pri: PRI[pri] ? pri : "mid",
+                date, time: /^\d{2}:\d{2}$/.test(time) ? time : "", done: false, createdAt: Date.now() };
+    this.tasks[t.id] = t;
+    await this.store.saveTask(t);
+  },
+  async toggle(id) {
+    const t = this.tasks[id]; if (!t) return;
+    const next = { ...t, done: !t.done };
+    this.tasks[id] = next;
+    await this.store.saveTask(next);
+  },
+  async remove(id) {
+    delete this.tasks[id];
+    await this.store.deleteTask(id);
+  },
+  async setMood(level, note) {
+    const date = dateKey();
+    const prev = this.moods[date] || {};
+    const m = { date, level: level ?? prev.level ?? null, note: (note ?? prev.note ?? "").slice(0, 500), updatedAt: Date.now() };
+    this.moods[date] = m;
+    await this.store.saveMood(m);
+  },
+
+  sorted(list) {
+    const pr = { high: 0, mid: 1, low: 2 };
+    return list.sort((a, b) =>
+      (a.done - b.done) || (a.time || "99").localeCompare(b.time || "99") || (pr[a.pri] - pr[b.pri]) || (a.createdAt - b.createdAt));
+  },
+  today() {
+    const key = dateKey();
+    const all = Object.values(this.tasks);
+    return {
+      timed: all.filter(t => t.date === key && t.time).sort((a, b) => a.time.localeCompare(b.time)),
+      untimed: this.sorted(all.filter(t => t.date === key && !t.time)),
+      overdue: this.sorted(all.filter(t => t.date < key && !t.done)),
+      total: all.filter(t => t.date === key).length,
+      done: all.filter(t => t.date === key && t.done).length,
+    };
+  },
+  grouped(cat, showDone) {
+    const key = dateKey(), tmr = addDays(key, 1);
+    const list = Object.values(this.tasks).filter(t => (cat === "all" || t.cat === cat) && (showDone || !t.done));
+    const groups = [
+      { title: "Хоцорсон", late: true, items: list.filter(t => t.date < key && !t.done) },
+      { title: "Өнөөдөр", items: list.filter(t => t.date === key) },
+      { title: "Маргааш", items: list.filter(t => t.date === tmr) },
+      { title: "Дараа", items: list.filter(t => t.date > tmr) },
+      { title: "Өмнө дууссан", items: list.filter(t => t.date < key && t.done) },
+    ];
+    groups.forEach(g => { g.items = g.title === "Дараа" ? g.items.sort((a, b) => a.date.localeCompare(b.date) || (a.time || "99").localeCompare(b.time || "99")) : this.sorted(g.items); });
+    return groups.filter(g => g.items.length);
+  },
+  // ── Playlist ──
+  playlistOn(key) { return (this.playlists[key] && this.playlists[key].items) || []; },
+  async addSong(url, title) {
+    const info = parseMusicUrl(url || "");
+    if (!info) throw new Error("Зөв линк оруулна уу (https://… гэж эхэлсэн).");
+    const date = dateKey();
+    const items = this.playlistOn(date);
+    if (items.length >= 50) throw new Error("Нэг өдөрт 50 хүртэлх дуу нэмэх боломжтой.");
+    if (items.some(i => i.url === info.url)) throw new Error("Энэ линк аль хэдийн нэмэгдсэн байна.");
+    const item = { id: uid(), url: info.url, platform: info.platform, kind: info.kind, host: info.host,
+                   title: (title || "").trim().slice(0, 120), addedAt: Date.now() };
+    const p = { date, items: [...items, item] };
+    this.playlists[date] = p;
+    await this.store.savePlaylist(p);
+  },
+  async removeSong(id) {
+    const date = dateKey();
+    const p = { date, items: this.playlistOn(date).filter(i => i.id !== id) };
+    this.playlists[date] = p;
+    await this.store.savePlaylist(p);
+  },
+  latestPastPlaylist() {
+    const today = dateKey();
+    const keys = Object.keys(this.playlists).filter(k => k < today && this.playlistOn(k).length).sort();
+    return keys.length ? keys[keys.length - 1] : null;
+  },
+  async reusePlaylist(fromKey) {
+    const date = dateKey();
+    const p = { date, items: this.playlistOn(fromKey).map(i => ({ ...i, id: uid(), addedAt: Date.now() })) };
+    this.playlists[date] = p;
+    await this.store.savePlaylist(p);
+  },
+
+  tasksOn(key) { return this.sorted(Object.values(this.tasks).filter(t => t.date === key)); },
+  // Нэг сарын ажлуудыг өдрөөр нь бүлэглэнэ: { "2026-10-19": [..], ... }
+  byDate() {
+    const map = {};
+    Object.values(this.tasks).forEach(t => { (map[t.date] = map[t.date] || []).push(t); });
+    Object.keys(map).forEach(k => this.sorted(map[k]));
+    return map;
+  },
+  moodToday() { return this.moods[dateKey()] || null; },
+  moodHistory(days) {
+    const out = []; const key = dateKey();
+    for (let i = days - 1; i >= 0; i--) { const k = addDays(key, -i); out.push({ date: k, mood: this.moods[k] || null }); }
+    return out;
+  },
+};
+
+/* ==========================================================
+   3. UI ДАВХАРГА
+   Зөвхөн зурах, хэрэглэгчийн үйлдлийг Logic руу дамжуулах.
+   ========================================================== */
+const ui = { view: "today", cat: "all", showDone: false, newCat: { today: "work", tasks: "work", calendar: "work" },
+             calMonth: dateKey().slice(0, 7), calSel: dateKey(), calFormFor: null, plIndex: 0, plSpinning: false };
+
+function showToast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.style.display = "block";
+  clearTimeout(showToast._t); showToast._t = setTimeout(() => t.style.display = "none", 3200);
+}
+async function act(fn) {
+  try { await fn(); } catch (e) { showToast(e && e.message ? e.message : "Хадгалж чадсангүй. Дахин оролдоно уу."); }
+  render();
+}
+
+function taskRow(t, { showDate = false } = {}) {
+  const row = el("div", "task" + (t.done ? " done" : ""));
+  row.dataset.cat = t.cat;
+  const chk = el("button", "check"); chk.setAttribute("aria-label", t.done ? "Дуусаагүй болгох" : "Дууссан болгох");
+  chk.onclick = () => act(() => Planner.toggle(t.id));
+  const body = el("div", "body");
+  body.appendChild(el("div", "name", t.title));
+  const meta = el("div", "meta");
+  meta.appendChild(el("span", "tag " + t.cat, CAT[t.cat]));
+  if (t.pri !== "mid") meta.appendChild(el("span", t.pri === "high" ? "pri-high" : "", PRI[t.pri] + " ач холбогдол"));
+  if (showDate) meta.appendChild(el("span", "", prettyDate(t.date)));
+  if (t.time && showDate) meta.appendChild(el("span", "", t.time));
+  body.appendChild(meta);
+  const del = el("button", "del", "×"); del.setAttribute("aria-label", "Устгах");
+  del.onclick = () => act(() => Planner.remove(t.id));
+  row.append(chk, body, del);
+  return row;
+}
+
+function buildForm(container) {
+  const which = container.dataset.form;
+  container.innerHTML = `
+    <div class="row">
+      <input class="field title" type="text" maxlength="200" placeholder="Юу хийх вэ?" aria-label="Ажлын нэр">
+      <div class="seg" role="group" aria-label="Төрөл">
+        <button type="button" data-cat="work" aria-pressed="true">Ажил</button>
+        <button type="button" data-cat="personal" aria-pressed="false">Хувийн</button>
+      </div>
+    </div>
+    <div class="row">
+      <input class="field date" type="date" aria-label="Огноо">
+      <input class="field time" type="time" aria-label="Цаг (заавал биш)">
+      <select class="field pri" aria-label="Ач холбогдол">
+        <option value="high">Өндөр</option><option value="mid" selected>Дунд</option><option value="low">Бага</option>
+      </select>
+      <button class="btn add" type="button">Нэмэх</button>
+    </div>
+    <div class="formerr" role="alert"></div>`;
+  const q = s => container.querySelector(s);
+  q(".date").value = dateKey();
+  container.querySelectorAll(".seg button").forEach(b => b.onclick = () => {
+    ui.newCat[which] = b.dataset.cat;
+    container.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  });
+  const submit = async () => {
+    try {
+      await Planner.addTask({ title: q(".title").value, cat: ui.newCat[which], pri: q(".pri").value, date: q(".date").value, time: q(".time").value });
+      q(".title").value = ""; q(".time").value = ""; q(".formerr").textContent = "";
+      render();
+    } catch (e) { q(".formerr").textContent = e.message; }
+    q(".title").focus();
+  };
+  q(".add").onclick = submit;
+  q(".title").addEventListener("keydown", e => { if (e.key === "Enter") submit(); });
+}
+
+function renderToday() {
+  const h = new Date().getHours();
+  $("#greet").textContent = h < 12 ? "Өглөөний мэнд" : h < 18 ? "Өдрийн мэнд" : "Оройн мэнд";
+  $("#todayDate").textContent = prettyDate(dateKey());
+
+  // Сэтгэл санаа
+  const m = Planner.moodToday();
+  const picker = $("#moodPicker"); picker.innerHTML = "";
+  MOODS.forEach(md => {
+    const b = el("button", "moodbtn");
+    b.setAttribute("aria-pressed", m && m.level === md.level);
+    b.append(el("span", "face", md.face), el("span", "", md.label));
+    b.onclick = () => act(() => Planner.setMood(md.level, null));
+    picker.appendChild(b);
+  });
+  const active = m && MOODS.find(x => x.level === m.level);
+  document.documentElement.style.setProperty("--mood", active ? active.color : "#C9C27A");
+  const note = $("#moodNote");
+  if (document.activeElement !== note) note.value = m ? m.note || "" : "";
+
+  // Төлөвлөгөө
+  const d = Planner.today();
+  $("#todayCount").textContent = d.total ? `${d.done} / ${d.total} дууссан` : "";
+  $("#todayBar").style.width = d.total ? (d.done / d.total * 100) + "%" : "0";
+  const plan = $("#todayPlan"); plan.innerHTML = "";
+  if (d.overdue.length) {
+    plan.appendChild(el("div", "group-title late", "Хоцорсон"));
+    d.overdue.forEach(t => plan.appendChild(taskRow(t, { showDate: true })));
+    plan.appendChild(el("div", "group-title", "Цагтай"));
+  }
+  const nowStr = pad(new Date().getHours()) + ":" + pad(new Date().getMinutes());
+  let nowMarked = false;
+  const tl = el("div", "timeline");
+  d.timed.forEach(t => {
+    const slot = el("div", "slot");
+    const tm = el("div", "t", t.time);
+    if (!nowMarked && !t.done && t.time >= nowStr) { tm.classList.add("now"); nowMarked = true; }
+    slot.append(tm, taskRow(t));
+    tl.appendChild(slot);
+  });
+  plan.appendChild(tl);
+
+  const un = $("#todayUntimed"); un.innerHTML = "";
+  un.appendChild(el("div", "group-title", "Өнөөдөр, цаггүй"));
+  if (!d.untimed.length) un.appendChild(el("div", "empty", "Цаггүй ажил алга."));
+  d.untimed.forEach(t => un.appendChild(taskRow(t)));
+}
+
+function renderTasks() {
+  const box = $("#taskGroups"); box.innerHTML = "";
+  const groups = Planner.grouped(ui.cat, ui.showDone);
+  if (!groups.length) return;
+  groups.forEach(g => {
+    box.appendChild(el("div", "group-title" + (g.late ? " late" : ""), `${g.title} (${g.items.length})`));
+    g.items.forEach(t => box.appendChild(taskRow(t, { showDate: g.title !== "Өнөөдөр" })));
+  });
+}
+
+function renderMood() {
+  const strip = $("#moodStrip"); strip.innerHTML = "";
+  const hist = Planner.moodHistory(14);
+  hist.forEach(({ date, mood }) => {
+    const md = mood && MOODS.find(x => x.level === mood.level);
+    const day = el("div", "day");
+    const dot = el("div", "dot" + (md ? " has" : ""), md ? md.face : "");
+    if (md) dot.style.background = md.color;
+    dot.title = md ? `${prettyDate(date)}: ${md.label}` : prettyDate(date);
+    const [, , dd] = date.split("-");
+    day.append(dot, el("div", "", Number(dd)));
+    strip.appendChild(day);
+  });
+  const list = $("#moodEntries"); list.innerHTML = "";
+  const entries = Object.values(Planner.moods).filter(m => m.level || m.note).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 30);
+  if (!entries.length) { list.appendChild(el("div", "empty", "Тэмдэглэл алга. Өнөөдөр хуудаснаас сэтгэл санаагаа сонгоорой.")); return; }
+  entries.forEach(m => {
+    const md = MOODS.find(x => x.level === m.level);
+    const row = el("div", "entry");
+    row.appendChild(el("div", "face", md ? md.face : "·"));
+    const b = el("div");
+    b.appendChild(el("div", "when", prettyDate(m.date) + (md ? " — " + md.label : "")));
+    if (m.note) b.appendChild(el("div", "", m.note));
+    row.appendChild(b);
+    list.appendChild(row);
+  });
+}
+
+function renderPlaylist() {
+  const items = Planner.playlistOn(dateKey());
+  $("#plCount").textContent = items.length ? `${items.length}` : "";
+  const box = $("#plList"); box.innerHTML = "";
+  if (ui.plIndex >= items.length) ui.plIndex = Math.max(0, items.length - 1);
+  if (!items.length) {
+    $("#player").hidden = true; ui.plSpinning = false;
+    const past = Planner.latestPastPlaylist();
+    if (past) {
+      const n = Planner.playlistOn(past).length;
+      const b = el("button", "ghost", `${prettyDate(past, false)}-ны playlist-ийг ашиглах (${n} дуу)`);
+      b.onclick = () => act(() => Planner.reusePlaylist(past));
+      box.appendChild(b);
+    }
+    return;
+  }
+  renderPlayer(items);
+  items.forEach((it, i) => {
+    const pf = PLATFORMS[it.platform] || PLATFORMS.other;
+    const row = el("div", "song" + (i === ui.plIndex ? " sel" : ""));
+    row.onclick = e => { if (e.target.closest("a, button")) return; ui.plIndex = i; ui.plSpinning = false; render(); };
+    row.appendChild(el("span", "idx", i + 1));
+    const dot = el("span", "pdot"); dot.style.background = pf.color; row.appendChild(dot);
+    const info = el("div", "info");
+    const fallback = it.platform === "other" ? it.host : `${pf.name} ${KIND[it.kind] || "дуу"}`;
+    info.appendChild(el("div", "stitle", it.title || fallback));
+    info.appendChild(el("div", "ssub", it.title ? `${pf.name} · ${KIND[it.kind] || "дуу"}` : it.host));
+    row.appendChild(info);
+    const a = el("a", "openbtn", "Сонсох");
+    a.href = it.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+    a.onclick = () => { ui.plIndex = i; ui.plSpinning = true; setTimeout(render, 0); };
+    a.setAttribute("aria-label", `${it.title || fallback} — ${pf.name}-д нээх`);
+    row.appendChild(a);
+    const del = el("button", "del", "×"); del.setAttribute("aria-label", "Хасах");
+    del.onclick = () => act(() => Planner.removeSong(it.id));
+    row.appendChild(del);
+    box.appendChild(row);
+  });
+}
+
+function renderPlayer(items) {
+  const it = items[ui.plIndex];
+  const pf = PLATFORMS[it.platform] || PLATFORMS.other;
+  const kind = KIND[it.kind] || "дуу";
+  const title = it.title || (it.platform === "other" ? it.host : `${pf.name} ${kind}`);
+  $("#player").hidden = false;
+  $("#pTitle").textContent = title;
+  $("#pSub").textContent = `${ui.plIndex + 1} / ${items.length} · ${pf.name} · ${kind}`;
+  $("#recLabel").style.setProperty("--label", pf.color);
+  $("#recNum").textContent = ui.plIndex + 1;
+  $("#record").classList.toggle("spin", ui.plSpinning);
+  const play = $("#pPlay");
+  play.href = it.url;
+  play.setAttribute("aria-label", `${title} — ${pf.name}-д сонсох`);
+  $("#pPrev").disabled = items.length < 2;
+  $("#pNext").disabled = items.length < 2;
+}
+function stepSong(n) {
+  const len = Planner.playlistOn(dateKey()).length; if (len < 2) return;
+  ui.plIndex = (ui.plIndex + n + len) % len; ui.plSpinning = false; render();
+}
+
+async function addSongFromForm() {
+  try {
+    await Planner.addSong($("#plUrl").value, "");
+    $("#plUrl").value = ""; $("#plErr").textContent = "";
+    render();
+  } catch (e) { $("#plErr").textContent = e.message; }
+  $("#plUrl").focus();
+}
+
+function renderCalendar() {
+  const [y, m] = ui.calMonth.split("-").map(Number);
+  $("#calTitle").textContent = `${y} оны ${m}-р сар`;
+  const offset = (new Date(y, m - 1, 1).getDay() + 6) % 7; // Даваа гарагаас эхэлнэ
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const cells = Math.ceil((offset + daysInMonth) / 7) * 7;
+  const today = dateKey();
+  const map = Planner.byDate();
+
+  const grid = $("#calGrid"); grid.innerHTML = "";
+  ["Да", "Мя", "Лх", "Пү", "Ба", "Бя", "Ня"].forEach(w => grid.appendChild(el("div", "wd", w)));
+  for (let i = 0; i < cells; i++) {
+    const key = dateKey(new Date(y, m - 1, 1 - offset + i));
+    const list = map[key] || [];
+    const cell = el("button", "cell" + (key.slice(0, 7) !== ui.calMonth ? " other" : "") + (key === today ? " today" : ""));
+    cell.setAttribute("aria-pressed", key === ui.calSel);
+    cell.setAttribute("aria-label", prettyDate(key) + (list.length ? `, ${list.length} ажил` : ", ажилгүй"));
+    const top = el("div", "top");
+    top.appendChild(el("span", "num", Number(key.slice(8))));
+    const mood = Planner.moods[key];
+    const md = mood && MOODS.find(x => x.level === mood.level);
+    if (md) { const dot = el("span", "mdot"); dot.style.background = md.color; top.appendChild(dot); }
+    cell.appendChild(top);
+    if (list.length) {
+      const chips = el("div", "chips");
+      list.slice(0, 3).forEach(t => chips.appendChild(el("div", `cchip ${t.cat}${t.done ? " done" : ""}`, (t.time ? t.time + " " : "") + t.title)));
+      if (list.length > 3) chips.appendChild(el("div", "more", "+" + (list.length - 3)));
+      cell.appendChild(chips);
+    }
+    cell.onclick = () => { ui.calSel = key; ui.calMonth = key.slice(0, 7); render(); };
+    grid.appendChild(cell);
+  }
+
+  // Сонгосон өдрийн самбар
+  const items = Planner.tasksOn(ui.calSel);
+  const done = items.filter(t => t.done).length;
+  $("#calDayTitle").innerHTML = "";
+  $("#calDayTitle").append(prettyDate(ui.calSel), el("small", "", items.length ? `${done} / ${items.length} дууссан` : ""));
+  if (ui.calFormFor !== ui.calSel) {
+    const d = document.querySelector('[data-form="calendar"] .date');
+    if (d) d.value = ui.calSel;
+    ui.calFormFor = ui.calSel;
+  }
+  const box = $("#calDayList"); box.innerHTML = "";
+  items.forEach(t => box.appendChild(taskRow(t, { showDate: false })));
+}
+
+function shiftMonth(n) {
+  const [y, m] = ui.calMonth.split("-").map(Number);
+  ui.calMonth = dateKey(new Date(y, m - 1 + n, 1)).slice(0, 7);
+  render();
+}
+
+function render() {
+  ["today", "calendar", "tasks", "mood"].forEach(v => $("#view-" + v).hidden = v !== ui.view);
+  document.querySelectorAll(".navbtn").forEach(b => {
+    if (b.dataset.view === ui.view) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+  });
+  if (ui.view === "today") { renderToday(); renderPlaylist(); }
+  if (ui.view === "tasks") renderTasks();
+  if (ui.view === "mood") renderMood();
+  if (ui.view === "calendar") renderCalendar();
+}
+
+/* Үйл явдлууд */
+document.querySelectorAll(".navbtn").forEach(b => b.onclick = () => { ui.view = b.dataset.view; render(); window.scrollTo(0, 0); });
+document.querySelectorAll("[data-cat-filter]").forEach(b => b.onclick = () => {
+  ui.cat = b.dataset.catFilter;
+  document.querySelectorAll("[data-cat-filter]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+});
+$("#showDone").onchange = e => { ui.showDone = e.target.checked; render(); };
+$("#plAdd").onclick = addSongFromForm;
+$("#pPrev").onclick = () => stepSong(-1);
+$("#pNext").onclick = () => stepSong(1);
+$("#pPlay").addEventListener("click", () => { ui.plSpinning = true; setTimeout(render, 0); });
+$("#themeBtn").onclick = () => {
+  const next = currentTheme() === "dark" ? "light" : "dark";
+  applyTheme(next);
+  try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+};
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => applyTheme());
+applyTheme();
+$("#plUrl").addEventListener("keydown", e => { if (e.key === "Enter") addSongFromForm(); });
+$("#calPrev").onclick = () => shiftMonth(-1);
+$("#calNext").onclick = () => shiftMonth(1);
+$("#calToday").onclick = () => { ui.calMonth = dateKey().slice(0, 7); ui.calSel = dateKey(); render(); };
+$("#moodNote").addEventListener("change", e => act(() => Planner.setMood(null, e.target.value)));
+document.querySelectorAll(".addform").forEach(buildForm);
+
+/* Эхлүүлэх */
+(async function init() {
+  Planner.store = await pickAdapter();
+  $("#store").textContent = Planner.store.label;
+  let first = true;
+  await Planner.store.start((tasks, moods, playlists) => {
+    Planner.tasks = tasks; Planner.moods = moods; Planner.playlists = playlists || {};
+    if (first) { $("#loading").hidden = true; first = false; }
+    render();
+  });
+})();
+</script>
+</body>
+</html>
